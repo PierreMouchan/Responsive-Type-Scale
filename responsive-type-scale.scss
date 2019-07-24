@@ -1,0 +1,78 @@
+// DEFINE THE RATIO BETWEEN BREAKPOINTS
+$fs-ratio: 1.25;
+// DEFINE THE FONT BASE (BODY) OF YOUR TEXT ( 16PX IS LIKE A CONVENTION)
+$fs-base: 16px;
+// DEFINE THE TYPE SCALE BETWEEN EACH LEVEL ( H1 - H2 - H3 - ... - P)
+$type-ratio: 1.125;
+
+// LIST OF YOUR BREAKPOINTS
+$fs-breakpoints: (
+        tablet: 768px,
+        desktop: 1024px,
+        xlarge: 1440px
+);
+
+// LIST OF TYPE SCALE ( LOGICALLY DOESNT HAVE TO CHANGE )
+$type-scale-list: (
+        h1: 6,
+        h2: 5,
+        h3: 4,
+        h4: 3,
+        h5: 2,
+        h6: 1,
+        p: 0
+);
+
+// CONVERT PX TO EM BASED ON FONT BASE ( BODY )
+@function em($pixels, $context: $fs-base) {
+  @if (unitless($pixels)) {
+    $pixels: $pixels * 1px;
+  }
+  @if (unitless($context)) {
+    $context: $context * 1px;
+  }
+  @return $pixels / $context * 1em;
+}
+
+// JUST A SASS FUNCTION FOR SQUARE OPERATOR ( LOGICALLY DOESNT HAVE TO CHANGE )
+@function pow($number, $exponent) {
+  $value: 1;
+
+  @if $exponent > 0 {
+    @for $i from 1 through $exponent {
+      $value: $value * $number;
+    }
+  }
+
+  @return $value;
+}
+
+// JUST A SASS FUNCTION TO USE EACH BREAKPOINT DEFINED ( LOGICALLY DOESNT HAVE TO CHANGE )
+@mixin breakpointMq($bp) {
+  @media (min-width: em($bp)) {
+    @content;
+  }
+}
+
+// MIXINS USED TO DEFINED THAT THE CURRENT TEXT NEED TO USED THIS SASS SNIPPET
+// @include responsiveTypo($type-scale: 'your-level-of-text');
+@mixin responsiveTypo($font-size: $fs-base, $type-scale: 'p') {
+  font-size: em($font-size) * pow($type-ratio, map-get($map: $type-scale-list, $key: $type-scale));
+  @each $name, $bp in $fs-breakpoints {
+    @include breakpointMq($bp) {
+      font-size: (
+              ceil(
+						(
+								(pow($fs-ratio, index($fs-breakpoints, $name $bp))) * em($font-size) *
+									pow($type-ratio, map-get($map: $type-scale-list, $key: $type-scale))
+							) * 100
+					) / 100
+      );
+    }
+  }
+}
+
+// GENERAL LINE HEIGHT DEFINED TO 1.2 ( CAN BE REMOVE )
+html{
+  line-height: 1.2;
+}
